@@ -1,12 +1,12 @@
 # ejercicio1
 
-1.	Para empezar trabajaremos con datos provenientes de la World Values Survey, obtenidos mediante su levantamiento más reciente correspondiente a su “oleada” de aplicación 2010-2013. La base puede ser encontrada en el archivo anexo este repositorio.
+1. Para empezar trabajaremos con datos provenientes de la World Values Survey, obtenidos mediante su levantamiento más reciente correspondiente a su “oleada” de aplicación 2010-2013. La base puede ser encontrada en el archivo anexo este repositorio.
 
-2.	Con el propósito de realizar una primera exploración sobre la dificultad técnica y metodológica que implica simplificar un conjunto de indicadores en unas pocas variables, vamos a restringirnos al análisis de los ítems sobre confianza social e institucional para el caso de los registros de México. 
+2. Con el propósito de realizar una primera exploración sobre la dificultad técnica y metodológica que implica simplificar un conjunto de indicadores en unas pocas variables, vamos a restringirnos al análisis de los ítems sobre confianza social e institucional para el caso de los registros de México. 
 
-3.	La variable V2 indica el código asignado a cada país, mientras que las variables V108-V126 recogen escalas de Likert sobre la confianza de los entrevistados en torno a distintas instituciones y figuras de carácter público. 
+3. La variable V2 indica el código asignado a cada país, mientras que las variables V108-V126 recogen escalas de Likert sobre la confianza de los entrevistados en torno a distintas instituciones y figuras de carácter público. 
 
-4.	Se deberá realizar una exploración de datos para saber cómo se distribuyen dichas variables. Asimismo, una vez concretado dicho paso, se deberá sugerir de qué manera podemos construir un índice que colapse “n” cantidad de ítems en un reducido número de variables sobre la confianza institucional y social de los mexicanos a partir de la WVS. 
+4. Se deberá realizar una exploración de datos para saber cómo se distribuyen dichas variables. Asimismo, una vez concretado dicho paso, se deberá sugerir de qué manera podemos construir un índice que colapse “n” cantidad de ítems en un reducido número de variables sobre la confianza institucional y social de los mexicanos a partir de la WVS. 
 
 En STATA podemos seguir los siguientes pasos:
 
