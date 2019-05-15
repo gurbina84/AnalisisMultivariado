@@ -1,1 +1,136 @@
-adadad
+# ejercicio1
+
+1.	Para empezar trabajaremos con datos provenientes de la World Values Survey, obtenidos mediante su levantamiento más reciente correspondiente a su “oleada” de aplicación 2010-2013. La base puede ser encontrada en el archivo anexo este repositorio.
+
+2.	Con el propósito de realizar una primera exploración sobre la dificultad técnica y metodológica que implica simplificar un conjunto de indicadores en unas pocas variables, vamos a restringirnos al análisis de los ítems sobre confianza social e institucional para el caso de los registros de México. 
+
+3.	La variable V2 indica el código asignado a cada país, mientras que las variables V108-V126 recogen escalas de Likert sobre la confianza de los entrevistados en torno a distintas instituciones y figuras de carácter público. 
+
+4.	Se deberá realizar una exploración de datos para saber cómo se distribuyen dichas variables. Asimismo, una vez concretado dicho paso, se deberá sugerir de qué manera podemos construir un índice que colapse “n” cantidad de ítems en un reducido número de variables sobre la confianza institucional y social de los mexicanos a partir de la WVS. 
+
+En STATA podemos seguir los siguientes pasos:
+
+/*Paso1. Carga de la base de datos WVS desde su directorio específico*/
+
+use "C:\Users\MyDirectory\WV6_Stata_v_2016_01_01.dta", clear
+
+/*Paso2. Usar el comando tabm para una exploración detallada de las frecuencias 
+de distintas variables correspondientes a una sola batería del cuestionario. Si
+los usuarios no cuentan con el comando instalado teclear findit tabchi*/
+
+tabm V108 V109 V110 V111 V112 V113 V114 V115 V116 V117 V118 V119 V120 V121 V122 V123 V124 V125_05 V126 if V2==484
+tabm V108 V109 V110 V111 V112 V113 V114 V115 V116 V117 V118 V119 V120 V121 V122 V123 V124 V125_05 V126 if V2==484, nolabel
+tabm V108 V109 V110 V111 V112 V113 V114 V115 V116 V117 V118 V119 V120 V121 V122 V123 V124 V125_05 V126 if V2==484, nofreq column
+
+*Generamos una categoría global para simplificar el trabajo con comandos
+global confid  V108 V109 V110 V111 V112 V113 V114 V115 V116 V117 V118 V119 V120 V121 V122 V123 V124 V125_05 V126
+
+/*Recodificamos para tener una jerarquía mucho más intuitiva en el etiquetado
+de nuestras variables*/
+
+recode $confid (-2=0) (-1=0) (4=1) (3=2) (2=3) (1=4)
+lab define confid 0 "No sabe" 1 "Nada en absoluto" 2 "No mucho" 3 "Bastante" 4 "Mucho"
+lab val $confid confid 
+tabm $confid if V2==484
+
+*Intentemos mediante una prueba de confiabilidad y consistencia 
+	alpha $confid if V2==484, std
+	alpha $confid if V2==484, std item detail label
+	alpha $confid if V2==484, std gen(confidalpha)
+
+*Comencemos haciendo la exploración de correlaciones de nuestras variables
+pwcorr $confid if V2==484
+
+/*Notaremos que algunos ítems tienden a estar más correlacionados que otros, lo 
+cual tiende a ocurrir dada la composición multidimensional de los constructos que 
+deseamos hacer observables*/
+
+/*Procedamos con un análisis de componentes principales*/
+pca $confid if V2==484
+
+/*Para determinar el número de componentes a retener, podemos recurrir a los
+Eigenvalues>1 así como a su representación gráfica a partir de un diagrama de árbol
+o Screeplot. Dado que los componentes retenidos pueden verse afectados por el tamaño
+de la muestra, es importante agregar los intervalos de confianza con los cuales se
+estiman los valors de nuestros Eigenvalues. Esto nos da una idea de qué tan amplia 
+puede ser la variación en nuestro umbral de retención*/
+
+screeplot, ci mean
+
+/*Con una decisión orientada a la retención de tres componentes, simplifiquemos
+nuestra exploración a sólo tres elementos. Deberemos recordar que todos los ítems
+(19 ítems originales) cargan en todos y cada uno de los componentes retenidos. La 
+diferencia estriba en que estos tienden a poseer cargas ponderadas. Esto quiere
+decir que algunos elementos específicos poseen mayor importancia en la caracte-
+rización de ciertos componentes principales. Esto nos da una idea aproximada a la
+noción de multidimensionalidad de constructo, misma que podemos contrastar de mejor
+forma a partir de otras técnicas como el análisis factorial*/
+
+pca $confid if V2==484, comp(3)
+
+/*Estat loadings nos permite desplegar las cargas de cada ítem al interior de
+cada componente retenido, donde la suma cuadrática de cada carga es igual a 1*/
+
+estat loadings
+
+/*La opción cnorm(eigen) nos permite modificar la interpretación de manera tal que 
+la suma cuadrática de cada carga será igual al Eigenvalue asociado a cada componente.
+Recordemos que el Eigenvalue es un parámetro de la varianza asociada a cada componente
+retenido. El objetivo del PCA consiste en tratar de ajustar la mayor cantidad de varianza
+posible con un número reducido de variables a partir de un conjunto más amplio de
+ítems de un conjunto original. Es básicamente un ejercicio de parsimonia*/
+
+estat loading, cnorm(eigen)
+
+/*El comando estat anti nos muestra las correlaciones inversas o negativas, las 
+cuales nos sirven como un criterio para saber qué tan confiable será nuestra reducción
+de dimensionalidad a partir de una técnica como el PCA o el análisis factorial*/
+
+estat anti, nocov
+
+/*El comando estat kmo, nos permite calcular el estadístico Kaiser Meyer Olkin, 
+el cual nos da una magnitud aproximada de la adecuación muestral, entendiendo por
+esta qué tan fiable es la relación de nuestros datos considerando el grado de 
+heterogeneidad de nuestra muestra*/
+
+estat kmo
+screeplot
+screeplot, mean
+screeplot, ci mean
+
+/*Los loadingplots sirven para graficar las cargas vectoriales asociadas a los 
+Eigenvalues de cada componente retenido en el ejercicio*/
+
+loadingplot
+loadingplot, comp(3) combined ///
+	mlabsize(small) msize(vsmall) msymbol(oh) ///
+	title("Combinado: Solución a tres componentes principales") ///
+	note("Fuente: elaboración propia con base en la WVS, 2010-13") ///
+	caption("Unrotated PCA")
+scoreplot if V2==484, comp(3) combined 
+
+/*Finalmente, está el paso de la rotación que nos sirve para simplificar la 
+interpretación de las cargas de nuestros componentes, así como para discernir si 
+deseamos obtener nuevas variables correlacionadas o incorrelacionadas entre sí*/
+
+/*Podemos llevar a cabo la predicción de nuestras nuevas variables a partir
+de los componentes estimados*/
+
+predict pc1 pc2 pc3
+
+/*La rotación varimax nos permite una rotación ortogonal con componentes no 
+correlacionados. El comando predict nos permite estimar nuevas variables a partir 
+de los componentes principales retenidos mediante nuestro ejercicio.*/
+
+rotate, varimax horst blanks(.3)
+predict pco1 pco2 pco3
+cor pco1 pco2 pco3 if V2==484
+
+
+/*La rotación promax nos permite una rotación oblicua con componentes correlacionados
+donde introducimos otros supuestos de relación entre las dimensiones de nuestro 
+constructo. Veamos algunas diferencias y pensemos en sus alcances*/
+
+rotate, promax horst blanks(.3)
+predict pc1a pc2a pc3a
+cor pc1a pc2a pc3a if V2==484
