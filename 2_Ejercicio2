@@ -3,3 +3,154 @@ INTRODUCCIÓN AL ANÁLISIS FACTORIAL
 Volvamos a emplear los registros de la WVS 2010-2013, los cuales pueden ser descargados en este mismo repositorio 
 (WV6_Stata_v_2016_01_01.rar).
 
+use "C:\Users\MyDirectory\WV6_Stata_v_2016_01_01.dta", clear
+**Recuerde introducir la cadena específica de su directorio cuando aparazca la referencia "MyDirectory"**
+
+/*Retenemos observaciones solo para el caso de México*/
+keep if V2==484
+
+/*Construimos nuestro shortcut "confid"*/
+global confid  V108 V109 V110 V111 V112 V113 V114 V115 V116 V117 V118 V119 V120 V121 V122 V123 V124 V125_05 V126
+
+/*Recodificamos para tener una jerarquía mucho más intuitiva en el etiquetado
+de nuestras variables*/
+recode $confid (-2=0) (-1=0) (4=1) (3=2) (2=3) (1=4)
+lab define confid 0 "No sabe" 1 "Nada en absoluto" 2 "No mucho" 3 "Bastante" 4 "Mucho"
+lab val $confid confid 
+tabm $confid
+
+/*Este es el procedimiento general para tener una panorámica de la distribución de 
+variables*/
+
+kdensity V108 if V2==484, normal
+graph save Graph "C:\Users\MyDirectory\gráficos\kdensity_s2\1_v108.gph", replace
+kdensity V109 if V2==484, normal
+graph save Graph "C:\Users\MyDirectory\gráficos\kdensity_s2\2_v109.gph", replace
+kdensity V110 if V2==484, normal 
+graph save Graph "C:\Users\MyDirectory\gráficos\kdensity_s2\3_v110.gph", replace
+kdensity V111 if V2==484, normal
+graph save Graph "C:\Users\MyDirectory\gráficos\kdensity_s2\4_v111.gph", replace
+kdensity V112 if V2==484, normal
+graph save Graph "C:\Users\MyDirectory\gráficos\kdensity_s2\5_v112.gph", replace
+
+graph combine "C:\Users\MyDirectory\gráficos\kdensity_s2\1_v108.gph" "C:\Users\\MyDirectory\gráficos\kdensity_s2\2_v109.gph" //
+    "C:\Users\MyDirectory\gráficos\kdensity_s2\3_v110.gph" "C:\Users\gaurbina\MyDirectory\gráficos\kdensity_s2\4_v111.gph"  //
+    "C:\Users\MyDirectory\gráficos\kdensity_s2\5_v112.gph"
+    
+/*Podemos comparar los coeficientes de correlación producto-momento de Pearson
+con aquellos obtenidos a partir de una matriz de correlaciones policóricas*/
+
+corr V108 V109 V110 V111 V112
+polychoric V108 V109 V110 V111 V112
+
+
+/*(1) Para llevar a cabo una primera aproximación al análisis factorial, 
+comenzaremos por invocar la matriz de correlaciones policóricas. A partir de dicha
+matriz vamos ejecutar el resto de nuestros procedimientos*/
+
+polychoric $confid
+
+/*matrix r nos permite almacenar los resultados de nuestra matriz de correlaciones
+en la memoria de STATA*/
+
+matrix r = r(R)
+
+/*(2) La primera variante del factor analysis, está dada por el método de componentes
+principales. Para comparar algunos de sus elementos con el PCA vamos a realizar primeramente
+un PCA para nuestra matriz de correlaciones*/ 
+
+pcamat r, n(2000)
+estat loadings, cnorm(eigen)
+
+pcamat r, n(2000) comp(3)
+estat loadings, cnorm(eigen)
+
+/*Para hacer comparable nuestra salida vamos a requerir un factor análisis con la 
+opción pcf. Esta nos permite indicar que el método elegido es el de componentes 
+principales*/
+
+factormat r, n(2000) pcf
+
+/*(3) Cuando no se especifica una opción de método, el análisis factorial se realiza
+por defecto bajo la modalidad de factores principales o mínimos cuadrados*/
+
+factormat r, n(2000)
+
+/*Con la opción altdivisor, podemos cambiar el divisor para estimar la proporción
+de varianza ajustada. En lugar de emplear la suma de los eigenvalues como denominador, 
+empleamos el matrix correlation trace, equivalente a la suma de diagonales de nuestra
+matriz. Generalmente, tenemos tantas diagonales como ítems en el conjunto original*/
+
+factormat r, n(2000) altdivisor
+
+/*(4) Ahora intentemos una solución para solo 2 de los factores con eigenvalues
+mayores a 1 y veamos como se modifica la unicidad asociada a cada variable*/
+
+factormat r, n(2000) factor(2)
+
+/*Las pruebas para verificar la pertinencia y validez del análisis son muy
+similares a las revisadas en el PCA. Asimismo, debe recordarse que el análisis
+factorial cuenta con una prueba general de verosimilitud donde se contrasta que
+un modelo independiente o no factorial ajusta mejor que un modelo saturado*/
+
+estat kmo
+estat anti, nocov
+estat smc 
+screeplot, mean
+loadingplot, xline(0.5) yline(0.1) aspect(1) note(unrotated principal factors) ///
+	mlabsize(small) msize(vsmall) msymbol(oh) ///
+	title("Solución bi-factorial") ///
+	note("Fuente: elaboración propia con base en la WVS, 2010-13") ///
+	caption("Unrotated FA, Principal Factors Method")
+
+estat common
+
+/*Rotación ortogonal*/
+
+rotate, varimax horst blanks(.3)
+loadingplot, xline(0.3) yline(0.3) aspect(1) note(rotated principal factors) ///
+	mlabsize(small) msize(vsmall) msymbol(oh) ///
+	title("Solución bi-factorial") ///
+	note("Fuente: elaboración propia con base en la WVS, 2010-13") ///
+	caption("Rotación Ortogonal FA, Principal Factors Method")
+
+estat common
+
+/*Rotación oblicua*/
+
+rotate, oblimin oblique blanks(.3)
+estat common
+loadingplot, xline(0.3) yline(0.3) aspect(1) note(rotated principal factors) ///
+	mlabsize(small) msize(vsmall) msymbol(oh) ///
+	title("Solución bi-factorial") ///
+	note("Fuente: elaboración propia con base en la WVS, 2010-13") ///
+	caption("Rotación Oblicua FA, Principal Factors Method")
+	
+/*Predicción de factores*/
+*Factores ortogonales
+
+rotate, varimax horst blanks(.3)
+predict conf1 conf2
+sum conf1 conf2
+egen zconf1=std(conf1)
+egen zconf2=std(conf2)
+sum zconf1 zconf2
+
+/*(5) Factores principales iterados*/
+factormat r, n(2000) ipf
+
+*Ahora ajustemos reteniendo solo dos factores
+factormat r, n(2000) ipf factor(2)
+
+/* (6) Método de máxima verosimilitud*/
+
+/*Máxima verosimilitud*/
+factormat r, n(2000) ml
+factormat r, n(2000) ml factors(2)
+	
+estat kmo
+rotate, oblimin oblique blanks(.3)
+estat common
+estat kmo
+rotate, varimax horst blanks(.3)
+estat common
