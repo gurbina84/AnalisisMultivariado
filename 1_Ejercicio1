@@ -141,3 +141,5 @@ constructo. Veamos algunas diferencias y pensemos en sus alcances*/
 rotate, promax horst blanks(.3)
 predict pc1a pc2a pc3a
 cor pc1a pc2a pc3a if V2==484
+
+*FIN DE EJERCICIO
