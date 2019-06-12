@@ -105,6 +105,14 @@ loadingplot, xline(0.5) yline(0.1) aspect(1) note(unrotated principal factors) /
 
 estat common
 
+/*Para apreciar la distribución de cargas de cada variable podemos 
+recurrir al scoreplot, el cual junto con la opción msize nos permite aproximar
+una mejor visualización de como se distribuyen los puntajes factoriales a lo 
+largo de nuestras observaciones. La opción msize nos permite reducir el tamaño
+del marcador a fin de tener una vista más nítida en el plano*/
+
+scoreplot, msize(tiny)
+
 /*Rotación ortogonal*/
 
 rotate, varimax horst blanks(.3)
@@ -115,6 +123,7 @@ loadingplot, xline(0.3) yline(0.3) aspect(1) note(rotated principal factors) ///
 	caption("Rotación Ortogonal FA, Principal Factors Method")
 
 estat common
+scoreplot, msize(tiny)
 
 /*Rotación oblicua*/
 
@@ -125,7 +134,9 @@ loadingplot, xline(0.3) yline(0.3) aspect(1) note(rotated principal factors) ///
 	title("Solución bi-factorial") ///
 	note("Fuente: elaboración propia con base en la WVS, 2010-13") ///
 	caption("Rotación Oblicua FA, Principal Factors Method")
-	
+
+scoreplot, msize(tiny)
+
 /*Predicción de factores*/
 *Factores ortogonales
 
@@ -135,6 +146,16 @@ sum conf1 conf2
 egen zconf1=std(conf1)
 egen zconf2=std(conf2)
 sum zconf1 zconf2
+
+/*Predicción de factores
+Rotación oblicua*/
+
+rotate, oblimin oblique blanks(.3)
+estat common
+predict rconf1 rconf2
+egen zrconf1=std(rconf1)
+egen zrconf2=std(rconf2)
+sum zrconf1 zrconf2
 
 /*(5) Factores principales iterados*/
 factormat r, n(2000) ipf
