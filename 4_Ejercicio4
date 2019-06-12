@@ -1,0 +1,194 @@
+*****OTRA INMERSIÓN AL ANÁLISIS DE CLUSTERS*****
+
+use "C:\Users\MyDirectory\ejercicio_inequality adjusted hid.dta", clear
+
+
+*Exploración de variables para corroborar la similitud en las unidades de medida*
+sum hdi chuman_ineq i_le_index i_ed_index i_adinc_index
+
+/*Estandarización de todo el paquete de variables de interés. Esto lo hacemos con
+el propósito de resguardar la comparabilidad entre los aspectos sobre los cuales se
+basa nuestro cotejo*/
+
+egen zhdi=std(hdi)
+egen zchuman=std(chuman_ineq)
+egen zle=std(i_le_index)
+egen zed=std(i_ed_index)
+egen zinc=std(i_adinc_index)
+
+sum zhdi zchuman zle zed zinc
+
+/*(1) Realización de una exploración por análisis de cluster mediante el método
+de encadenamiento completo*/
+
+cluster completelinkage zhdi zchuman zle zed zinc, name(cl)
+
+/*Tratemos de visualizar el dendograma*/
+cluster dendrogram cl, labels(country)
+
+/*Como habrán podido notar, STATA nos remite un mensaje de error el cual indica
+"too many leaves; consider using the cutvalue() or cutnumber() options"
+Aquí es importante tener ciertas intuiciones sobre la estructura de datos con la 
+cual trabajamos, ya que esto nos ayudará a tomar decisiones relativamente "artesanales"
+sobre como establecer un punto de corte para la visualización del dendograma.
+En nuestro caso dado que tenemos una estructura compuesta por 151 observaciones, vamos
+a pertitirnos solicitar un punto de corte para 20 grupos*/
+
+cluster dendrogram cl, cutn(20) showcount xlabel(, angle(90) labsize(*.75))
+
+/*La opción cutn nos permite establecer el punto de corte o el número de agrupamientos
+mínimos que deseamos visualizar. La opción showcount nos permite visualizar cuántas
+observaciones están agrupadas en cada corte. Finalmente, las opciones xlabel junto con las 
+incidaciones de ángulo y tamaño de etiqueta nos permiten mejorar la visualización gráfica
+de nuestro dendograma. Para mayores inquietudes se sugiere hacer uso del comando help 
+cluster dendogram*/
+
+/*Si tuviéramos un poco más de inquietudes sobre el tipo de países condensados en cada
+corte, podemos solicitar el empleo de la etiqueta país (country) únicamente de forma 
+indicativa. Esto nos permite identificar cuál es el país que encabeza cada punto de corte. 
+Si nuestros clusters son lo suficientemente distintivos, probablemente nos brinden una
+buena idea de qué tipo de países se condensaran al interior de cada subgrupo*/
+
+cluster dendrogram cl, cutn(20) showcount labels(country) xlabel (, angle(90) labsize(*.75)) 
+
+/*Para determinar el número óptimo de clusters hemos visto que en realidad existe una tensión
+entre el valor heurístico de la herramienta y los criterios estadísticos provistos por las normas 
+Duda-Hart y Calinski-Harabasz. En ese sentido, el consejo radica en siempre buscar un equilibrio
+entre los propósitos analíticos de quien investiga y los indicadores estadísticos de idoneidad en 
+la solución. Como habrá notado en nuestro libro, nosotros no promovemos una fe ciega en las reglas
+de "dedo arriba" usualmente empleadas con criterios técnico-estadísticos.
+Ahora bien dicho lo anterior, vale la pena recordar que solo con fines de orientación, 
+para ambas normas, tanto Duda como Calinski, a mayores valores de la PseudoF de Calinski
+y del indicador Je(2)/Je(1) de Duda, mayor será la distinción óptima entre clusters. Asimismo,
+como corolario, en el caso de la regla Duda, valores altos de Je(2)/Je(1) suelen estar
+asociados con magnitudes más pequeñas de pseudo T-Squared*/
+
+cluster stop cl, rule(duda) groups(1/10)
+/*Una interpretación ortodoxa de la regla Duda-Hart nos sugiere que la solución con la
+distinción más óptima es aquella de 5 grupos: Je(2)/Je(1)=0.7761 y PseudoTSq=7.5*/
+
+/*Por su parte una interpretación ortodoxa de la regla Calinski nos sugiere en una 
+primera instancia una solución a 2 grupos. Desde luego dicha partición resulta inverosímil
+para nuestros propósitos analíticos. Por ende, la solución más óptima sería aquella de 4 
+grupos, a la cual le corresponde un valor de PseudoF-Calinski de 239.45*/
+
+cluster stop cl, rule(calinski) groups(2/10)
+
+/*Hagamos una pruebas con ambas soluciones
+Con la primera línea de comando pedimos una agrupación en cuatro conjuntos a partir
+del análisis previamente llevado a cabo (name(cl))
+Con la segunda línea especificamos que nos cree una agrupación en cinco conjuntos
+Las indicaciones paisescl y paisescl2 nos sirven para crear las variables que contendrán 
+las etiquetas de correspondencia a cada grupo*/
+cluster gen paisescl=groups(4), name(cl)
+cluster gen paisescl2=groups(5), name(cl)
+
+/*Ahora ordenemos por el primer criterio. Solución a 4 grupos (paisescl)*/
+sort paisescl
+
+/*Si ordenamos un listado de país (country); clase o tipo sugerida por ONU (type);
+grupo de pertenencia bajo el arreglo de 4 clusters (paisescl); y grupo de pertenencia
+bajo el arreglo de 5 clusters (paisescl2) podremos cotejar qué tanto cambia la ordenación
+entre casos a la luz de distintas configuraciones de partición*/
+
+list country type paisescl paisescl2
+
+/*Para tener mayor idea de la proporción de discrepancias podemos crear una variable 
+denominada control, la cual nos indique como, según distintos arreglos, nuestras observaciones
+se desplazan de una "clase" a otra.*/
+gen control=1 if paisescl==type
+replace control=2 if paisescl!=type
+lab define control 1 "Coincidente" 2 "NoCoincidente"
+lab val control control 
+
+tab control type
+tab paisescl type
+
+gen control2=1 if paisescl2==type
+replace control2=2 if paisescl2!=type
+lab val control2 control
+
+tab control2 type 
+tab paisescl2 type
+
+/*Evidentemente la solución a 5 grupos crea mayores discrepancias, en tanto la clasificación
+de ONU solo se establece a partir de cuatro cortes*/
+
+/*Si desea visualizar la variación en algunos de los indicadores base de cotejo y los grupos
+obtenidos mediante cluster analysis se puede seguir la siguiente línea de comandos:*/
+
+list country type paisescl if paisescl2==1
+list country hdi chuman_ineq i_le_index i_ed_index i_adinc_index if paisescl2==1
+
+list country type paisescl if paisescl2==2
+list country hdi chuman_ineq i_le_index i_ed_index i_adinc_index if paisescl2==2
+
+list country type paisescl if paisescl2==3
+list country hdi chuman_ineq i_le_index i_ed_index i_adinc_index if paisescl2==3
+
+list country type paisescl if paisescl2==4
+list country hdi chuman_ineq i_le_index i_ed_index i_adinc_index if paisescl2==4
+
+list country hdi chuman_ineq i_le_index i_ed_index i_adinc_index if paisescl2==5
+
+list country type paisescl control
+
+
+***UN CAMINO ALTERNATIVO A PARTIR DE LA ESTIMACIÓN DE UNA MATRIZ DE DISIMILITUD***
+
+/*Estimación de la matriz de disimilitud ocdeD a partir de nuestros cinco indicadores
+clave. IMPORTANTE: los resultados obtenidos en la matriz enlistada de 5x5 pueden 
+variar dependiendo de las instrucciones almacenadas en la memoria de STATA. Eso no quiere
+decir que se hallan obtenido resultados discrepantes o incorrectos con relación a los
+expuestos en el libro.*/
+
+matrix dissimilarity ocdeD=zhdi zchuman zle zed zinc, L2
+matlist ocdeD[1..5,1..5]
+
+/*Estimación de agrupación de observaciones a partir de la matriz de disimilitudes
+ocdeD*/
+
+clustermat completelink ocdeD, name(avgocde) add
+
+/*Ahora comparemos los indicadores del número óptimo de clusters. 
+La opción clustermat stop usa por defecto a la regla Calinski. 
+En este primer caso, estamos contrastando los indicadores de esta última regla
+obtenidos mediante la matriz de disimilitud y mediante el ejercicio de agrupamiento 
+previamente realizado.
+Notaremos que las magnitudes son iguales*/
+
+clustermat stop, variables(zhdi zchuman zle zed zinc)
+cluster stop cl, rule(calinski) groups(2/10)
+
+/*De igual modo, con las líneas de comando inferiores tratamos de comparar los resultados
+mediante el empleo de la regla Duda-Hart en la estimación por matriz de disimilitud y
+la estimación directa previamente realizada*/
+
+clustermat stop, variables(zhdi zchuman zle zed zinc) rule(duda)
+cluster stop cl, rule(duda) groups(1/10)
+
+/*Para corroborar la consistencia entre esquemas de agrupamiento*/
+cluster gen paisescl3=groups(5)
+
+list country type paisescl2 paisescl3
+sort paisescl3
+list country type paisescl2 paisescl3 if paisescl3>2 & paisescl3<5
+
+/*Solo hay una discrepancia en el sentido de que en una clasificación el grupo
+se indica con el número 3 y en otro con el número 4*/
+
+/*
+gen control3=1 if paisescl2==paisescl3
+replace control3=2 if paisescl2!=paisescl3
+lab val control3 control 
+*/
+tab paisescl2 paisescl3 
+
+/*En caso de querer comparar las coincidencias con la clasificación original de 
+ONU (type) podemos volver a construir una tercera variable de control*/
+
+gen control3=1 if paisescl3==type
+replace control3=2 if paisescl3!=type
+lab val control3 control
+tab control control2
+list control control2 control3
