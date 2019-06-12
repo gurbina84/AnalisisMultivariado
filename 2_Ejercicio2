@@ -175,3 +175,5 @@ estat common
 estat kmo
 rotate, varimax horst blanks(.3)
 estat common
+
+*FIN DE EJERCICIO
