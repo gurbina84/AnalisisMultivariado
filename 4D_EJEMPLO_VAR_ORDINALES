@@ -1,0 +1,57 @@
+****  UN EJEMPLO DE AGRUPAMIENTO DE VARIABLES ORDINALES ****
+
+/*Ahora vamos a trabajar con un ejemplo de agrupamiento de variables ordinales.
+Para ello, vamos a hacer uso de un extracto más de la base de datos DAO. En esta
+ocasión haremos uso de un conjunto de reactivos sobre confianza en distintas
+figuras de carácters social. El Dataset lo pueden encontrar en este mismo
+repositorio con el nombre 4D_DAO.dta*/
+
+use "C:\Users\MyDirectory\4D_DAO.dta", clear
+
+lab var conf_compaesc "Compañeros escuela"
+lab var conf_prof "Profesores"
+lab var conf_cura "Sacerdotes"
+lab var conf_partpol "Partidos políticos"
+lab var conf_radiotv "Líderes radioTV"
+lab var conf_internet "Fuentes internet"
+lab var conf_amig "Amigos"
+lab var conf_vecin "Vecinos"
+lab var conf_soc "Sociedad en gral."
+lab var conf_fam "Familia"
+lab var conf_gober "Gobernantes"
+lab var conf_medic "Médicos"
+lab var conf_polici "Policías"
+lab var conf_empres "Empresarios"
+lab var conf_ejercito "Ejército"
+lab var conf_pobres "Personas +pobres"
+lab var conf_ricos "Peronas +ricas"
+lab var conf_indios "Indígenas"
+lab var conf_mayores "Personas mayores"
+lab var conf_menores "Personas menores"
+lab var conf_diferen "Personas diferentes"
+
+global confid conf_compaesc conf_prof conf_cura conf_partpol conf_radiotv ///
+	conf_internet conf_amig conf_vecin conf_soc conf_fam conf_gober ///
+	conf_medic conf_polici conf_empres conf_ejercito conf_pobres conf_ricos ///
+	conf_indios conf_mayores conf_menores conf_diferen
+
+tabm $confid, nofreq row
+
+/*Por tratarse de un conjunto de variables ordinales, esta vez haremos uso de la
+medida de disimilitud de Gower*/
+
+matrix dissimilarity confiD= $confid, variables Gower dissim(oneminus)
+matlist confiD[1..5,1..5]
+
+clustermat completelink confiD, name(confianza) clear labelvar(question)
+
+/*Dado que estamos realizando un R-analysis, sabemos que las variables de orden, 
+altura y aglomeración no podrán ser añadidas a nuestra base, pues tenemos una 
+discrepancia de columnas y filas. Por ello, establecemos la opción clear, junto 
+con la opción de retener una etiqueta labelvar(question) que nos permita guardar 
+el etiquetado de nuestras variables de interés.*/
+
+cluster dendrogram confianza, labels(question) ///
+	xlabel(, angle(90) labsize(*.75)) ///
+	title(Cluster de Variables-encadenamiento completo) ///
+	ytitle (1-Gower similarity, suffix)
