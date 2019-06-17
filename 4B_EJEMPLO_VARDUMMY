@@ -109,6 +109,8 @@ table grp3, c(mean sumvul median sumvul min sumvul max sumvul)
 /*CAMINO II
 Con fines pedagógicos, en este Do-File se muestra un camino alternativo*/
 
+*Abrimos nuevamente nuestra base de datos*
+
 use "C:\Users\MyDirectory\4B_DAO.dta", clear
 /*Volvemos a etiquetar variables una vez que hemos vuelto a abrir nuestra misma
 base de datos*/
