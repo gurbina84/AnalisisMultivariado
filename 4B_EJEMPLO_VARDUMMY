@@ -109,13 +109,7 @@ table grp3, c(mean sumvul median sumvul min sumvul max sumvul)
 /*CAMINO II
 Con fines pedagógicos, en este Do-File se muestra un camino alternativo*/
 
-use trayec_embara trayec_robo trayec_salud trayec_dejapordinero ///
-	trayec_dejaporfam trayec_violesc trayec_violhogar trayec_violpareja trayec_violautoripub ///
-	trayec_discrimesc trayec_discrimcalle trayec_violautoriesc trayec_discrimpub ///
-	trayec_adictmia trayec_adicamigos trayec_adicpadres using ///
-	"C:\Users\urbin\OneDrive\Documentos\CES_COLMEX\artículos\LIBRO_MULTIVARIADO\GITHUB\EJ4_var_cat\4B_DAO.dta", clear
-
-*use "C:\Users\MyDirectory\4B_DAO.dta", clear
+use "C:\Users\MyDirectory\4B_DAO.dta", clear
 /*Volvemos a etiquetar variables una vez que hemos vuelto a abrir nuestra misma
 base de datos*/
 
