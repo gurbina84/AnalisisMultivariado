@@ -1,0 +1,122 @@
+**** EJERCICIO 6. UNA PROPUESTA DE SOLUCIÓN ****
+
+/*Ahora vamos a trabajar con un ejemplo de agrupamiento de variables ordinales.
+Para ello, vamos a hacer uso de un extracto más de la base de datos DAO. En esta
+ocasión haremos uso de un conjunto de reactivos sobre confianza en distintas
+figuras de carácters social. El Dataset lo pueden encontrar en este mismo
+repositorio con el nombre 4D_DAO.dta*/
+
+*use "C:\Users\MyDirectory\4D_DAO.dta", clear
+
+lab var conf_compaesc "Compañeros escuela"
+lab var conf_prof "Profesores"
+lab var conf_cura "Sacerdotes"
+lab var conf_partpol "Partidos políticos"
+lab var conf_radiotv "Líderes radioTV"
+lab var conf_internet "Fuentes internet"
+lab var conf_amig "Amigos"
+lab var conf_vecin "Vecinos"
+lab var conf_soc "Sociedad en gral."
+lab var conf_fam "Familia"
+lab var conf_gober "Gobernantes"
+lab var conf_medic "Médicos"
+lab var conf_polici "Policías"
+lab var conf_empres "Empresarios"
+lab var conf_ejercito "Ejército"
+lab var conf_pobres "Personas +pobres"
+lab var conf_ricos "Peronas +ricas"
+lab var conf_indios "Indígenas"
+lab var conf_mayores "Personas mayores"
+lab var conf_menores "Personas menores"
+lab var conf_diferen "Personas diferentes"
+
+global confid conf_compaesc conf_prof conf_cura conf_partpol conf_radiotv ///
+	conf_internet conf_amig conf_vecin conf_soc conf_fam conf_gober ///
+	conf_medic conf_polici conf_empres conf_ejercito conf_pobres conf_ricos ///
+	conf_indios conf_mayores conf_menores conf_diferen
+
+tabm $confid, nofreq row
+
+/*Ahora vamos realizar un ejercicio de transposición de la base de datos
+para trabajar con nuestras variables de interés*/
+
+xpose, clear varname
+
+/*Sabemos que para variables ordinales la mejor opción de medida es Gower. Sin 
+embargo, en esta ocasión vamos hacer una prueba mediante la opción de medida
+"correlation". En esto asumimos que estamos tratando a estas variables ordinales
+como si tuvieran propiedades de una variable escalar*/
+
+matrix dissimilarity confiD=v1-v1644, correlation dissim(oneminus)
+matlist confiD 
+
+clustermat completelink confiD, name(trust) add
+
+cluster dendrogram trust, labels(_varname) ///
+	xlabel(, angle(90) labsize(*.75)) ///
+	title(Cluster de Variables-encadenamiento completo) ///
+	ytitle (1-Correlation similarity, suffix)
+	
+/*Como verán aunque el tratamiento de la medida de similitud partió
+de un supuesto relativamente forzado, los resultados parecen ser bastante intuitivos. 
+En este caso por tratarse de variables ordinales, no resulta tan aberrante asumir 
+un tratamiento mediante el empleo de la medida de correlación*/
+
+/*AHORA INTENTEMOS UNA SOLUCIÓN MEDIANTE OTRO TIPO DE ENCADENAMIENTO*/
+/*Ahora vamos a trabajar con un ejemplo de agrupamiento de variables ordinales.
+Para ello, vamos a hacer uso de un extracto más de la base de datos DAO. En esta
+ocasión haremos uso de un conjunto de reactivos sobre confianza en distintas
+figuras de carácters social. El Dataset lo pueden encontrar en este mismo
+repositorio con el nombre 4D_DAO.dta*/
+
+*use "C:\Users\MyDirectory\4D_DAO.dta", clear
+
+lab var conf_compaesc "Compañeros escuela"
+lab var conf_prof "Profesores"
+lab var conf_cura "Sacerdotes"
+lab var conf_partpol "Partidos políticos"
+lab var conf_radiotv "Líderes radioTV"
+lab var conf_internet "Fuentes internet"
+lab var conf_amig "Amigos"
+lab var conf_vecin "Vecinos"
+lab var conf_soc "Sociedad en gral."
+lab var conf_fam "Familia"
+lab var conf_gober "Gobernantes"
+lab var conf_medic "Médicos"
+lab var conf_polici "Policías"
+lab var conf_empres "Empresarios"
+lab var conf_ejercito "Ejército"
+lab var conf_pobres "Personas +pobres"
+lab var conf_ricos "Peronas +ricas"
+lab var conf_indios "Indígenas"
+lab var conf_mayores "Personas mayores"
+lab var conf_menores "Personas menores"
+lab var conf_diferen "Personas diferentes"
+
+global confid conf_compaesc conf_prof conf_cura conf_partpol conf_radiotv ///
+	conf_internet conf_amig conf_vecin conf_soc conf_fam conf_gober ///
+	conf_medic conf_polici conf_empres conf_ejercito conf_pobres conf_ricos ///
+	conf_indios conf_mayores conf_menores conf_diferen
+
+tabm $confid, nofreq row
+
+/*Ahora vamos realizar un ejercicio de transposición de la base de datos
+para trabajar con nuestras variables de interés*/
+
+xpose, clear varname
+
+/*Sabemos que para variables ordinales la mejor opción de medida es Gower. Sin 
+embargo, en esta ocasión vamos hacer una prueba mediante la opción de medida
+"correlation". En esto asumimos que estamos tratando a estas variables ordinales
+como si tuvieran propiedades de una variable escalar*/
+
+matrix dissimilarity confiA=v1-v1644, Gower dissim(oneminus)
+matlist confiA 
+
+clustermat averagelink confiA, name(confprueba) add
+
+cluster dendrogram confprueba, labels(_varname) ///
+	xlabel(, angle(90) labsize(*.75)) ///
+	title(Cluster de Variables-average linkage) ///
+	ytitle (1-Gower similarity, suffix)
+
