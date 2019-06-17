@@ -1,0 +1,124 @@
+****EJEMPLO 4.7. AGRUPAMIENTO DE VARIABLES DE TIPO CATEGÓRICO****
+
+*Emplearemos nuevamente la base de datos de la DAO
+
+use "C:\Users\MyDirectory\4B_DAO.dta", clear
+
+
+lab var trayec_embara "Embarazo no deseado"
+lab var trayec_robo "Víctima delincuencia"
+lab var trayec_salud "Problemas de salud"
+lab var trayec_dejapordinero "Deserción escolar $"
+lab var trayec_dejaporfam "Deserción escolar familia"
+lab var trayec_violesc "Violencia escolar"
+lab var trayec_violhogar "Violencia doméstica"
+lab var trayec_violpareja "Violencia en la pareja"
+lab var trayec_violautoripub "Abuso de autoridad"
+lab var trayec_discrimesc "Discriminación escolar"
+lab var trayec_discrimcalle "Discriminación callejera"
+lab var trayec_violautoriesc "Trato desigual escuela"
+lab var trayec_discrimpub "Trato desigual serv.pub."
+lab var trayec_adictmia "Adicciones personales"
+lab var trayec_adicamigos "Adicciones de amigos"
+lab var trayec_adicpadres "Adicciones de familiares"
+
+global trayectoria trayec_embara trayec_robo trayec_salud trayec_dejapordinero ///
+	trayec_dejaporfam trayec_violesc trayec_violhogar trayec_violpareja trayec_violautoripub ///
+	trayec_discrimesc trayec_discrimcalle trayec_violautoriesc trayec_discrimpub ///
+	trayec_adictmia trayec_adicamigos trayec_adicpadres
+
+tabm $trayectoria
+tabm $trayectoria, nofreq row
+	
+recode $trayectoria (1=1) (2=0)
+
+lab define vul 1 "Me ha sucedido" 0 "No me sucedido"
+lab val $trayectoria vul
+
+tabm $trayectoria
+
+/*Creamos la matriz de disimilitud entre variables. Como nos interesa ver como 
+se aglutinan mejor algunos ítems, en esta ocasión no transponemos la base, pues 
+queremos trabajar con conglomerados de reactivos o de variables y no de observaciones*/
+
+matrix dissimilarity vulnerD=$trayectoria, variables Jaccard dissim(oneminus)
+matlist vulnerD 
+
+/*A partir del arreglo matricial procedamos a requerir los conglomerados. Si
+hay dudas sobre las opciones y la línea inferior de comandos por favor, revise
+detenidamente la descripción contenida en nuestro libro*/
+
+clustermat completelink vulnerD, name(vulner) clear labelvar(question)
+
+/*Ahora solicitamos el Dendograma*/
+
+cluster dendrogram vulner, labels(question) ///
+	xlabel(, angle(90) labsize(*.75)) ///
+	title(Cluster de Variables-encadenamiento completo) ///
+	ytitle (1-Jaccard similarity, suffix)
+
+/*Como veremos, el Dendograma nos brinda una idea de qué reactivos o dimensiones 
+están más relacionadas. Generalmente, esto sirve como para tener un indicio de
+como sintetizar algunas variables en índices o medidas resumen mediante otras
+técnicas que hemos ensayado previamente*/
+
+/*AHORA REVISEMOS UN CAMINO ALTERNATIVO*/
+
+/*Vamos a usar la siguiente línea de comandos, solo para quedarnos con las variables
+de interés*/
+
+use trayec_embara trayec_robo trayec_salud trayec_dejapordinero ///
+	trayec_dejaporfam trayec_violesc trayec_violhogar trayec_violpareja trayec_violautoripub ///
+	trayec_discrimesc trayec_discrimcalle trayec_violautoriesc trayec_discrimpub ///
+	trayec_adictmia trayec_adicamigos trayec_adicpadres using ///
+	"C:\Users\MyDirectory\4B_DAO.dta", clear
+
+lab var trayec_embara "Embarazo no deseado"
+lab var trayec_robo "Víctima delincuencia"
+lab var trayec_salud "Problemas de salud"
+lab var trayec_dejapordinero "Deserción escolar $"
+lab var trayec_dejaporfam "Deserción escolar familia"
+lab var trayec_violesc "Violencia escolar"
+lab var trayec_violhogar "Violencia doméstica"
+lab var trayec_violpareja "Violencia en la pareja"
+lab var trayec_violautoripub "Abuso de autoridad"
+lab var trayec_discrimesc "Discriminación escolar"
+lab var trayec_discrimcalle "Discriminación callejera"
+lab var trayec_violautoriesc "Trato desigual escuela"
+lab var trayec_discrimpub "Trato desigual serv.pub."
+lab var trayec_adictmia "Adicciones personales"
+lab var trayec_adicamigos "Adicciones de amigos"
+lab var trayec_adicpadres "Adicciones de familiares"
+
+global trayectoria trayec_embara trayec_robo trayec_salud trayec_dejapordinero ///
+	trayec_dejaporfam trayec_violesc trayec_violhogar trayec_violpareja trayec_violautoripub ///
+	trayec_discrimesc trayec_discrimcalle trayec_violautoriesc trayec_discrimpub ///
+	trayec_adictmia trayec_adicamigos trayec_adicpadres
+
+tabm $trayectoria
+tabm $trayectoria, nofreq row
+	
+recode $trayectoria (1=1) (2=0)
+
+lab define vul 1 "Me ha sucedido" 0 "No me sucedido"
+lab val $trayectoria vul
+
+tabm $trayectoria
+
+
+/*Ahora vamos realizar un ejercicio de transposición de la base de datos
+para trabajar con nuestras variables de interés*/
+
+xpose, clear varname
+
+matrix dissimilarity vulnerD=v1-v1644,Jaccard dissim(oneminus)
+matlist vulnerD 
+
+/*Como veremos, cada observación equivale en realidad a una variable*/
+
+clustermat completelink vulnerD, name(vulner) add
+
+cluster dendrogram vulner, labels(_varname) ///
+	xlabel(, angle(90) labsize(*.75)) ///
+	title(Cluster de Variables-encadenamiento completo) ///
+	ytitle (1-Jaccard similarity, suffix)
