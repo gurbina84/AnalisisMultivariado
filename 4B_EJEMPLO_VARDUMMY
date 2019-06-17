@@ -1,0 +1,171 @@
+****4.6.1. UN EJEMPLO DE AGRUPACIÓN DE OBSERVACIONES CON VARIABLES DUMMY****
+
+/*Para este ejercicio vamos a usar un extracto de la base de datos sobre situaciones adversas
+en la Delegación Álvaro Obregón, la cual fue obtenida mediante la aplicación de un cuestionario 
+de encuesta a una muestra de 1,644 jóvenes que cursan sus estudios en planteles de dicha
+demarcación. La base la pueden encontrar disponible en este mismo repositorio, con el nombre
+4B_DAO.dta*/
+
+*use "C:\Users\MyDirectory\4B_DAO.dta", clear
+
+*Etiquetamos variables correctamente para saber a qué nos referimos con cada ítem
+lab var trayec_embara "Embarazo no deseado"
+lab var trayec_robo "Víctima delincuencia"
+lab var trayec_salud "Problemas de salud"
+lab var trayec_dejapordinero "Deserción escolar $"
+lab var trayec_dejaporfam "Deserción escolar familia"
+lab var trayec_violesc "Violencia escolar"
+lab var trayec_violhogar "Violencia doméstica"
+lab var trayec_violpareja "Violencia en la pareja"
+lab var trayec_violautoripub "Abuso de autoridad"
+lab var trayec_discrimesc "Discriminación escolar"
+lab var trayec_discrimcalle "Discriminación callejera"
+lab var trayec_violautoriesc "Trato desigual escuela"
+lab var trayec_discrimpub "Trato desigual serv.pub."
+lab var trayec_adictmia "Adicciones personales"
+lab var trayec_adicamigos "Adicciones de amigos"
+lab var trayec_adicpadres "Adicciones de familiares"
+
+*Creamos un atajo global
+global trayectoria trayec_embara trayec_robo trayec_salud trayec_dejapordinero ///
+	trayec_dejaporfam trayec_violesc trayec_violhogar trayec_violpareja trayec_violautoripub ///
+	trayec_discrimesc trayec_discrimcalle trayec_violautoriesc trayec_discrimpub ///
+	trayec_adictmia trayec_adicamigos trayec_adicpadres
+
+/*Solicitamos una tabulación múltiple de variables. 
+Recuerde si el comando "tabm" no funciona, instale el módulo correspondiente de
+STATA. Esto lo puede hacer con el comando findit tabchi de  Nicholas J. Cox, 
+Durham University, U.K.*/
+
+tabm $trayectoria
+tabm $trayectoria, nofreq row
+
+/*Realizamos una recodificación para evitar problemas imputables a las valoraciones
+empleadas*/
+	
+recode $trayectoria (1=1) (2=0)
+
+lab define vul 1 "Me ha sucedido" 0 "No me sucedido"
+lab val $trayectoria vul
+
+tabm $trayectoria
+
+/*Ahora sí, comencemos con un análisis de conglomerados a partir del mejor
+agrupamiento de variables. En esta ocasión emplearemos la medida de disimilitud
+matching*/
+
+cluster completelinkage $trayectoria, measure(matching) name(cl)
+cluster list
+
+/*Si empleamos la instrucción "cluster tree", STATA nos devolverá el mensaje de 
+error "too many leaves". Necesitaremos establecer un punto de corte*/
+
+cluster tree, cutn(21) showcount xlabel(,angle(90) labsize(*.75))
+
+cluster stop cl, rule(duda) groups(1/10)
+cluster stop cl, rule(calinski) groups(2/10)
+
+/*Pese a la indeterminación de nuestras reglas podríamos guiarnos por una 
+interpretaciónn intuitiva del cluster tree, donde podemos apreciar tres 
+cortes. En virtud de ello, pidamos la especificación de tres grupos*/
+
+cluster generate grp3=group(3),  name(cl)
+
+/*Para intentar tener una visión intuitiva de como se arman nuestros grupos, bien
+podríamos ver como se da la aglutinación de variables a partir de una gráfica de
+barras. Por tratarse de variables dicotómicas, la frecuencia estará marcada por
+el promedio de cada ítem*/
+
+graph bar (mean) $trayectoria, over(grp3)
+
+graph bar $trayectoria, over(grp3)
+
+/*Si albergamos dudas sobre como se da la distribución, podemos recurrir nuevamente
+a un tabulado múltiple*/
+
+tabm $trayectoria if grp3==1, row
+tabm $trayectoria if grp3==2, row
+tabm $trayectoria if grp3==3, row
+
+list $trayectoria if grp3==3, nolabel abbreviate(3)
+
+/*Otra forma de corroborar la distinción es a través del contraste con la media de 
+la variabla "index_vulner", el cual es un índice construido a partir de la técnica
+de análisis factorial y el cual nos ayuda a tener una idea del grado de eventos
+acumulados a lo largo del curso de vida de las y los jóvenes encuestados*/
+
+table grp3, c(mean index_vulner)
+
+/*Si persiste la duda, podemos crear una variable indicativa a partir de la suma
+de eventos acumulados en forma cruda. Esto lo podemos hacer mediante la siguiente 
+instrucción:*/
+
+egen sumvul=rowtotal($trayectoria)
+
+table grp3, c(mean sumvul median sumvul min sumvul max sumvul)
+
+
+
+/*CAMINO II
+Con fines pedagógicos, en este Do-File se muestra un camino alternativo*/
+
+use trayec_embara trayec_robo trayec_salud trayec_dejapordinero ///
+	trayec_dejaporfam trayec_violesc trayec_violhogar trayec_violpareja trayec_violautoripub ///
+	trayec_discrimesc trayec_discrimcalle trayec_violautoriesc trayec_discrimpub ///
+	trayec_adictmia trayec_adicamigos trayec_adicpadres using ///
+	"C:\Users\urbin\OneDrive\Documentos\CES_COLMEX\artículos\LIBRO_MULTIVARIADO\GITHUB\EJ4_var_cat\4B_DAO.dta", clear
+
+*use "C:\Users\MyDirectory\4B_DAO.dta", clear
+/*Volvemos a etiquetar variables una vez que hemos vuelto a abrir nuestra misma
+base de datos*/
+
+lab var trayec_embara "Embarazo no deseado"
+lab var trayec_robo "Víctima delincuencia"
+lab var trayec_salud "Problemas de salud"
+lab var trayec_dejapordinero "Deserción escolar $"
+lab var trayec_dejaporfam "Deserción escolar familia"
+lab var trayec_violesc "Violencia escolar"
+lab var trayec_violhogar "Violencia doméstica"
+lab var trayec_violpareja "Violencia en la pareja"
+lab var trayec_violautoripub "Abuso de autoridad"
+lab var trayec_discrimesc "Discriminación escolar"
+lab var trayec_discrimcalle "Discriminación callejera"
+lab var trayec_violautoriesc "Trato desigual escuela"
+lab var trayec_discrimpub "Trato desigual serv.pub."
+lab var trayec_adictmia "Adicciones personales"
+lab var trayec_adicamigos "Adicciones de amigos"
+lab var trayec_adicpadres "Adicciones de familiares"
+
+global trayectoria trayec_embara trayec_robo trayec_salud trayec_dejapordinero ///
+	trayec_dejaporfam trayec_violesc trayec_violhogar trayec_violpareja trayec_violautoripub ///
+	trayec_discrimesc trayec_discrimcalle trayec_violautoriesc trayec_discrimpub ///
+	trayec_adictmia trayec_adicamigos trayec_adicpadres
+
+tabm $trayectoria
+tabm $trayectoria, nofreq row
+	
+recode $trayectoria (1=1) (2=0)
+
+lab define vul 1 "Me ha sucedido" 0 "No me sucedido"
+lab val $trayectoria vul
+
+tabm $trayectoria
+
+/*Transponiendo la base para trabajar con observaciones en lugar de variables*/
+xpose, clear varname
+
+/*En la línea de comandos con la cual solicitamos una matriz de disimilitud
+sugerimos emplear la medida Jaccard de disimilitud*/
+matrix dissimilarity vulnerD=v1-v1644, Jaccard dissim(oneminus)
+matlist vulnerD 
+matlist vulnerD[1..5,1..5]
+
+clustermat completelink vulnerD, name(vulner) add
+
+cluster dendrogram vulner, labels(_varname) ///
+	xlabel(, angle(90) labsize(*.75)) ///
+	title(Cluster de Variables-encadenamiento completo) ///
+	ytitle (1-Jaccard similarity, suffix)
+	
+cluster generate g3= group(3)
+cluster generate g5= group(5)
