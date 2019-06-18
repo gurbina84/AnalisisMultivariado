@@ -1,0 +1,19 @@
+****ANÁLISIS DE REDES MEDIANTE MDS****
+
+/*Para tener una aproximación muy básica al análisis de redes mediante el módulo
+Netplot de STATA, vamos a emplear la base de datos EJ5D_DesdeHacia_VidaCot.dta
+
+Si usted detecta que no cuenta con la aplicación del módulo Netplot en STATA, le
+recomendamos buscarlo mediante el comando findit Netplot desarrollado por Corten (2011)*/
+
+use "C:\Users\MyDirectory\EJ5D_DesdeHacia_VidaCot.dta", clear
+
+tab desde
+
+tab hacia
+
+netplot desde hacia, type(mds) label
+
+netplot desde hacia, type(circle) label arrow
+ 
+netplot desde hacia, iterations(1000) label arrow
