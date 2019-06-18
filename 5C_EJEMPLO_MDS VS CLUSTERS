@@ -1,0 +1,259 @@
+****CONVERGENCIA ENTRE EL MDS Y EL CLUSTER ANALYSIS****
+
+/*Para cotejar la convergencia entre el escalamiento multidimensional y el análisis
+de conglomerados, vamos a volver a emplear la base de datos sobre el Human Development
+Index usada en el ejercicio4 de nuestro libro. La base la pueden encontrar en nuestro
+repositorio con el nombre: 4_inequality adjusted hid.dta*/
+
+use "C:\Users\MyDirectory\4_inequality adjusted hid.dta", clear
+
+sum hdi chuman_ineq i_le_index i_ed_index i_adinc_index
+
+/*En primer lugar, con el objetivo de visualizar nuestros registros en un espacio de
+baja dimensionalidad vamos a comenzar a crear etiquetas un poco más cortas*/
+
+generate str country2 = ""
+replace country2 = "Nor" in 1
+replace country2 = "Aus" in 2
+replace country2 = "Swt" in 3
+replace country2 = "Den" in 4
+replace country2 = "Net" in 5
+replace country2 = "Ger" in 6
+replace country2 = "Ire" in 7
+replace country2 = "Usa" in 8
+replace country2 = "Can" in 9
+replace country2 = "Swe" in 10
+replace country2 = "Uk" in 11
+replace country2 = "Ice" in 12
+replace country2 = "Kor" in 13
+replace country2 = "Isr" in 14
+replace country2 = "Lux" in 15
+replace country2 = "Jap" in 16
+replace country2 = "BeG" in 17
+replace country2 = "Fra" in 18
+replace country2 = "AuS" in 19
+replace country2 = "Fin" in 20
+replace country2 = "Slo" in 21
+replace country2 = "Spa" in 22
+replace country2 = "Ita" in 23
+replace country2 = "Cze" in 24
+replace country2 = "Gree" in 25
+replace country2 = "Est" in 26
+replace country2 = "Cyp" in 27
+replace country2 = "SLo" in 28
+replace country2 = "Pol" in 29
+replace country2 = "Lit" in 30
+replace country2 = "Mal" in 31
+replace country2 = "Arg" in 32
+replace country2 = "Chi" in 33
+replace country2 = "Por" in 34
+replace country2 = "Hun" in 35
+replace country2 = "Lvi" in 36
+replace country2 = "Cro" in 37
+replace country2 = "Mgr" in 38
+replace country2 = "Blr" in 39
+replace country2 = "Rus" in 40
+replace country2 = "Rom" in 41
+replace country2 = "Ugy" in 42
+replace country2 = "Khz" in 43
+replace country2 = "Bul" in 44
+replace country2 = "Pan" in 45
+replace country2 = "Mau" in 46
+replace country2 = "TyT" in 47
+replace country2 = "Ser" in 48
+replace country2 = "Leb" in 49
+replace country2 = "CRi" in 50
+replace country2 = "Ira" in 51
+replace country2 = "Ven" in 52
+replace country2 = "Tky" in 53
+replace country2 = "Sri" in 54
+replace country2 = "Mex" in 55
+replace country2 = "Brs" in 56
+replace country2 = "Geo" in 57
+replace country2 = "Abj" in 58
+replace country2 = "Jor" in 59
+replace country2 = "Mac" in 60
+replace country2 = "Ukr" in 61
+replace country2 = "Per" in 62
+replace country2 = "Alb" in 63
+replace country2 = "Arm" in 64
+replace country2 = "ByH" in 65
+replace country2 = "Ecu" in 66
+replace country2 = "SaL" in 67
+replace country2 = "Fji" in 68
+replace country2 = "Mon" in 69
+replace country2 = "Tha" in 70
+replace country2 = "Tun" in 71
+replace country2 = "Col" in 72
+replace country2 = "Jam" in 73
+replace country2 = "Bel" in 74
+replace country2 = "Dom" in 75
+replace country2 = "Srm" in 76
+replace country2 = "Mlv" in 77
+replace country2 = "Bwn" in 78
+replace country2 = "Mld" in 79
+replace country2 = "Egy" in 80
+replace country2 = "Gab" in 81
+replace country2 = "Ind" in 82
+replace country2 = "Pgy" in 83
+replace country2 = "Pal" in 84
+replace country2 = "Uzb" in 85
+replace country2 = "Phi" in 86
+replace country2 = "Sal" in 87
+replace country2 = "Sth" in 88
+replace country2 = "Vie" in 89
+replace country2 = "Bol" in 90
+replace country2 = "Kyr" in 91
+replace country2 = "Irq" in 92
+replace country2 = "CaV" in 93
+replace country2 = "Guy" in 94
+replace country2 = "Nic" in 95
+replace country2 = "Mor" in 96
+replace country2 = "Nmb" in 97
+replace country2 = "Gua" in 98
+replace country2 = "Tjk" in 99
+replace country2 = "InD" in 100
+replace country2 = "Hon" in 101
+replace country2 = "Bht" in 102
+replace country2 = "TiL" in 103
+replace country2 = "Syr" in 104
+replace country2 = "Van" in 105
+replace country2 = "Cng" in 106
+replace country2 = "Krb" in 107
+replace country2 = "Zam" in 108
+replace country2 = "Gha" in 109
+replace country2 = "Lao" in 110
+replace country2 = "Ban" in 111
+replace country2 = "Cam" in 112
+replace country2 = "Sao" in 113
+replace country2 = "Ken" in 114
+replace country2 = "Nep" in 115
+replace country2 = "Pks" in 116
+replace country2 = "Ang" in 117
+replace country2 = "Swa" in 118
+replace country2 = "Tan" in 119
+replace country2 = "Ngr" in 120
+replace country2 = "Cmr" in 121
+replace country2 = "Mdg" in 122
+replace country2 = "Zbw" in 123
+replace country2 = "Mrt" in 124
+replace country2 = "Sol" in 125
+replace country2 = "Com" in 126
+replace country2 = "Yem" in 127
+replace country2 = "Les" in 128
+replace country2 = "Tog" in 129
+replace country2 = "Hai" in 130
+replace country2 = "Rwn" in 131
+replace country2 = "Ugn" in 132
+replace country2 = "Ben" in 133
+replace country2 = "Dji" in 134
+replace country2 = "Sen" in 135
+replace country2 = "Afg" in 136
+replace country2 = "IvC" in 137
+replace country2 = "Mwi" in 138
+replace country2 = "Eth" in 139
+replace country2 = "CnR" in 140
+replace country2 = "Lib" in 141
+replace country2 = "GuB" in 142
+replace country2 = "Mzm" in 143
+replace country2 = "SiL" in 144
+replace country2 = "Gui" in 145
+replace country2 = "BuF" in 146
+replace country2 = "Bur" in 147
+replace country2 = "Cha" in 148
+replace country2 = "CaR" in 149
+replace country2 = "N" in 150
+replace country2 = "Mli" in 143
+replace country2 = "Mzm" in 144
+replace country2 = "SL" in 145
+replace country2 = "Gui" in 146
+replace country2 = "BF" in 147
+replace country2 = "Bur" in 148
+replace country2 = "Cha" in 149
+replace country2 = "Car" in 150
+replace country2 = "Nig" in 151
+
+/*Escalamiento clásico*/
+mds hdi chuman_ineq i_le_index i_ed_index i_adinc_index, ///
+	id(country2) std method(classical) dimension(2) config
+
+/*Escalamiento moderno*/
+mds hdi chuman_ineq i_le_index i_ed_index i_adinc_index, ///
+	id(country2) std method(modern) dimension(2) config
+
+
+mdsconfig, aspectratio(0.5) ///
+	scheme(s2color) ///
+	mlabsize(vsmall) ///
+	msymbol (O) ///
+	mlcolor(black) ///
+	mfcolor(red) ///
+	title("MDS Comparación entre países" "Desarrollo humano e indicios de desigualdad") ///
+	note("Fuente: elaboración propia con base en datos de ONU, 2016" "Modern MDS (loss=stress; transform=identity)")
+
+mdsconfig, aspectratio(0.35) ///
+	scheme(s2color) ///
+	mlabsize(vsmall) ///
+	msymbol (O) ///
+	mlcolor(black) ///
+	mfcolor(red) ///
+	title("MDS Comparación entre países" "Desarrollo humano e indicios de desigualdad") ///
+	note("Fuente: elaboración propia con base en datos de ONU, 2016" "Modern MDS (loss=stress; transform=identity)")
+
+	
+
+/*Con los códigos de esta sección ya estamos familiarizados pues únicamente deseamos
+ajustar algunos clusters*/
+
+egen zhdi=std(hdi)
+egen zchuman=std(chuman_ineq)
+egen zle=std(i_le_index)
+egen zed=std(i_ed_index)
+egen zinc=std(i_adinc_index)
+
+sum zhdi zchuman zle zed zinc
+
+matrix dissimilarity ocdeD=zhdi zchuman zle zed zinc, L2
+matlist ocdeD[1..5,1..5]
+
+clustermat completelink ocdeD, name(avgocde) add
+cluster gen paisescl3=groups(5)
+
+/*Ahora comparamos clusters vs. mds*/
+
+mds hdi chuman_ineq i_le_index i_ed_index i_adinc_index, ///
+	id(paisescl3) std method(modern) dimension(2) config
+	
+mdsconfig, aspectratio(0.5) ///
+	scheme(s2color) ///
+	mlabsize(vsmall) ///
+	msymbol (O) ///
+	mlcolor(black) ///
+	mfcolor(red) ///
+	title("MDS Comparación entre países" "HDI vs. Desigualdad" "Clusters/MDS") ///
+	note("Fuente: elaboración propia con base en datos de ONU, 2016" "Modern MDS (loss=stress; transform=identity)")
+	
+mdsconfig, aspectratio(0.35) ///
+	scheme(s2color) ///
+	mlabsize(vsmall) ///
+	msymbol (O) ///
+	mlcolor(black) ///
+	mfcolor(red) ///
+	title("MDS Comparación entre países" "HDI vs. Desigualdad" "Clusters/MDS") ///
+	note("Fuente: elaboración propia con base en datos de ONU, 2016" "Modern MDS (loss=stress; transform=identity)")
+	
+	
+mdsshepard, ///
+    scheme(s1color) ///                                
+    msymbol(oh) ///                                    
+    mcolor(black) ///                                   
+    xaxis (1 2) ///                                     
+    yaxis (1 2) ///                                    
+    ylabel(, axis(1) nogrid) ///                       
+    ylabel(, axis(2) nolabel) ///                       
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                      
+    xtitle("", axis(2)) ///                            
+    ytitle("", axis(2)) ///
+	title("Distancias Sheppard" "MDS Comparación entre países" "HDI vs. Desigualdad") ///
+	note("Modern MDS")
