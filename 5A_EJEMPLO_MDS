@@ -1,0 +1,145 @@
+****V. ESCALAMIENTO MULTIDIMENSIONAL ****
+
+*****UNA INTRODUCCIÓN BREVE AL ESCALAMIENTO MULDIMIENSIONAL****
+/*PASO1. DEFINAMOS UNA MATRIZ DE DISTANCIAS*/
+
+clear
+matrix define dists = ( ///
+	0, 1172, 1118, 644, 683, 334, 609, 947, 961, 833\ ///
+	1172, 0, 809, 958, 651, 896, 563, 422, 460, 758 \ ///
+	1118, 809, 0, 620, 918, 784, 621, 1046, 349, 296\ ///
+	644, 958, 620, 0, 605, 359, 395, 933, 633, 324\ ///
+	683, 651, 918, 605, 0, 407, 297, 264, 636, 622\ ///
+	334, 896, 784, 359, 407, 0, 333, 671, 685, 488\ ///
+	609, 563, 621, 395, 297, 333, 0, 538, 352, 325\ ///
+	947, 422, 1046, 933, 264, 671, 538, 0, 697, 863\ ///
+	961, 460, 349, 633, 636, 685, 352, 697, 0, 326\ ///
+	833, 758, 296, 324, 622, 488, 325, 863, 326, 0)
+
+/*PASO2. ASIGNEMOS NOMBRES A LAS FILAS Y A LAS COLUMNAS
+DE NUESTRA MATRIZ DE DISTANCIAS, PARA POSTERIORMENTE IMPRIMIR
+LOS CONTENIDOS DE NUESTRA MATRIZ COMPUTADA*/
+
+matrix rownames dists = ACoruña Almería Barcelona Bilbao Cáceres León Madrid Sevilla Valencia Zaragoza
+
+matrix colnames dists = ACoruña Almería Barcelona Bilbao Cáceres León Madrid Sevilla Valencia Zaragoza
+
+matrix list dists
+
+/*PASO3. AHORA REALIZAMOS UN ESCALAMIENTO MULTIDIMENSIONAL DE DISTANCIAS ENTRE
+LAS 10 CIUDADES ESPAÑOLAS.
+DICHO PASO LO VAMOS A REALIZAR USANDO EL PROCEDIMIENTO mdsmat DADO QUE LOS DATOS 
+YA ESTÁN INTRODUCIDOS EN UNA MATRIZ. VAMOS A PEDIR TAMBIÉN QUE SE ALMACENE LA 
+CONFIGURACIÓN DEL MDS GRAFICADO EN MEMORIA*/
+
+mdsmat dists, ///
+   method(classical) ///
+   shape(full) ///
+   force ///
+   dimensions(2) ///
+   config
+
+graph display, name(basicmds)
+
+
+mdsmat dists, ///
+   method(modern) ///
+   loss(stress) ///
+   shape(full) ///
+   force ///
+   dimensions(2) ///
+   config
+
+/*EL PROCEDIMIENTO mdsmat GENERA UN DIAGRAMA BÁSICO. 
+PARA MEJORAR LA CONFIGURACIÓN GRÁFICA DE NUESTRO DIAGRAMA DE PUNTOS
+PODEMOS OPTAR POR EL COMANDO DE POST-ESTIMACIÓN mdsconfig.*/
+
+mdsconfig , ///
+    name(distconfig) ///
+    ynegate ///
+	xnegate ///
+    scheme(s1color) ///
+    msymbol(oh) ///                             
+    mcolor(black)  ///                                 
+    xaxis (1 2) ///                              
+    yaxis (1 2) ///                                 
+    ylabel(, axis(1) nogrid) ///                      
+    ylabel(, axis(2) nolabel) ///                      
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                     
+    xtitle("", axis(2)) ///                             
+    ytitle("", axis(2)) 
+
+/*UNA ÚLTIMA ALTERNATIVA ES EL DIAGRAMA SHEPARD.*/
+mdsshepard, ///
+    name(shepdists) ///
+    scheme(s1color) ///                                
+    msymbol(oh) ///                                    
+    mcolor(black) ///                                   
+    xaxis (1 2) ///                                     
+    yaxis (1 2) ///                                    
+    ylabel(, axis(1) nogrid) ///                       
+    ylabel(, axis(2) nolabel) ///                       
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                      
+    xtitle("", axis(2)) ///                            
+    ytitle("", axis(2))
+
+mdsshepard, separate
+
+
+/*MISMO EJERCICIO A PARTIR DE UN ESCALAMIENTO NO MÉTRICO
+
+Para esta sección vamos emplear una base de datos con unidades
+de registro en formato para un escalamiento no métric EJ5A_MDS nonmetric csv.dta*/
+
+use "C:\Users\MyDirectory\EJ5A_MDS nonmetric csv.dta", clear
+
+*Convertimos a una matriz simétrica
+mkmat v1-v10, matrix(S)
+mata: st_replacematrix("S",makesymmetric(st_matrix("S")))
+
+
+matrix rownames S = ACoruña Almería Barcelona Bilbao Cáceres León Madrid Sevilla Valencia Zaragoza
+
+matrix colnames S = ACoruña Almería Barcelona Bilbao Cáceres León Madrid Sevilla Valencia Zaragoza
+
+matrix list S
+
+mdsmat S, ///
+   method(nonmetric) ///
+   shape(full) ///
+   force ///
+   dimensions(2) ///
+   config
+
+ mdsconfig , ///
+    name(distsym) ///
+    ynegate ///
+	xnegate ///
+    scheme(s1color) ///
+    msymbol(oh) ///                             
+    mcolor(black)  ///                                 
+    xaxis (1 2) ///                              
+    yaxis (1 2) ///                                 
+    ylabel(, axis(1) nogrid) ///                      
+    ylabel(, axis(2) nolabel) ///                      
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                     
+    xtitle("", axis(2)) ///                             
+    ytitle("", axis(2)) 
+
+  
+mdsshepard, ///
+    name(shepsym) ///
+    scheme(s1color) ///                                
+    msymbol(oh) ///                                    
+    mcolor(black) ///                                   
+    xaxis (1 2) ///                                     
+    yaxis (1 2) ///                                    
+    ylabel(, axis(1) nogrid) ///                       
+    ylabel(, axis(2) nolabel) ///                       
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                      
+    xtitle("", axis(2)) ///                            
+    ytitle("", axis(2))
