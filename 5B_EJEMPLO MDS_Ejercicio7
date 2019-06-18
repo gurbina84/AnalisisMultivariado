@@ -1,0 +1,62 @@
+****5.4. Un ejemplo a partir de percepciones en un grupo de n-pequeña****
+
+/*Para este ejemplo vamos a emplear la base de datos sobre percepciones de carácter
+integrista y secular en materia religiosa. Pueden encontrar la base en el repositorio
+con el nombre: MDS_PERCEP_BACHILLERATO.dta*/
+
+use "C:\Users\MyDirectory\MDS_PERCEP_BACHILLERATO.dta", clear
+
+mds af1_ad af2_ab af3_ab af4_ab ab5_ab ab6_ab ab7_ab ab8_ab ab9_ab ab10_ab, id(id) method(classical) dimension(2) config
+
+
+mdsconfig, aspectratio(0.5) ///
+	scheme(s1color) ///
+	mlabsize(vsmall) ///
+	msymbol (O) ///
+	mlcolor(black) ///
+	mfcolor(red) ///
+	title("MDS Integral-Secular" "Ejercicio estudiantes de bachillerato") ///
+	note("Fuente: Sondeo aplicado en grupos de discusión, 2016") ///
+	caption("Classical MDS")
+	
+mdsshepard, ///
+    scheme(s1color) ///                                
+    msymbol(oh) ///                                    
+    mcolor(black) ///                                   
+    xaxis (1 2) ///                                     
+    yaxis (1 2) ///                                    
+    ylabel(, axis(1) nogrid) ///                       
+    ylabel(, axis(2) nolabel) ///                       
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                      
+    xtitle("", axis(2)) ///                            
+    ytitle("", axis(2)) ///
+	title("Distancias Sheppard" "MDS Integral-Secular" "Ejercicio estudiantes de bachillerato") 
+	
+/*RESOLUCIÓN DEL EJERCICIO 7*/
+
+mds af1_ad af2_ab af3_ab af4_ab ab5_ab ab6_ab ab7_ab ab8_ab ab9_ab ab10_ab, id(id) method(modern) dimension(2) config
+mdsconfig, aspectratio(0.5) ///
+	scheme(s2color) ///
+	mlabsize(vsmall) ///
+	msymbol (O) ///
+	mlcolor(black) ///
+	mfcolor(red) ///
+	title("MDS Integral-Secular" "Ejercicio estudiantes de bachillerato") ///
+	note("Fuente: Sondeo aplicado en grupos de discusión, 2016") ///
+	caption("Modern MDS")
+
+mdsshepard, ///
+    scheme(s1color) ///                                
+    msymbol(oh) ///                                    
+    mcolor(black) ///                                   
+    xaxis (1 2) ///                                     
+    yaxis (1 2) ///                                    
+    ylabel(, axis(1) nogrid) ///                       
+    ylabel(, axis(2) nolabel) ///                       
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                      
+    xtitle("", axis(2)) ///                            
+    ytitle("", axis(2)) ///
+	title("Distancias Sheppard" "MDS Integral-Secular" "Ejercicio estudiantes de bachillerato") ///
+	caption("Modern MDS")
