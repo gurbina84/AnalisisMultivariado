@@ -1,0 +1,139 @@
+****SOLUCIÓN AL EJERCICIO8 DE MDS****
+
+/*Para resolver este ejercicio, haremos uso de la base de datos: 8_G22_freedomhouse.dta*/
+
+use "C:\Users\MyDirectory\8_G22_freedomhouse.dta", clear
+
+encode status, gen(status2)
+label list status2
+tab status2
+
+drop if g22==0
+
+tab country
+	
+
+mds a_ag b_ag c_ag d_ag e_ag f_ag g_ag, ///
+	id(status) method(modern) dimension(2) config
+
+
+
+matrix dissimilarity fhouse=a_ag b_ag c_ag d_ag e_ag f_ag g_ag, L2 names(country)
+matlist fhouse[1..5,1..5]
+matlist fhouse
+
+mdsmat fhouse, ///
+   method(classical) ///
+   shape(full) ///
+   force ///
+   dimensions(2) ///
+   config
+
+ mdsmat fhouse, ///
+   method(modern) ///
+   loss(stress) ///
+   shape(full) ///
+   force ///
+   dimensions(2) ///
+   config
+
+/*Una solución alternativa*/ 
+
+use "C:\Users\MyDirectory\8_G22_freedomhouse.dta", clear
+
+
+encode status, gen(status2)
+label list status2
+tab status2
+
+drop if g22==0
+
+tab country
+
+/*Escalamiento métrico unidimensional basasado en L2*/
+mds a_ag b_ag c_ag d_ag e_ag f_ag g_ag, id(country) method(classical) dimension(1) config
+
+*Almacenar coordenadas y ordenar por ítem
+predict d1
+sort d1
+list country d1
+
+*Podemos reescalar, para ratioMDS
+gen rd1=d1/2
+list country rd1
+
+*Análisis métrico bidimensional
+mds a_ag b_ag c_ag d_ag e_ag f_ag g_ag, id(country) method(classical) dimension(2) config
+
+estat stress
+
+mdsconfig
+
+
+mdsconfig, aspectratio(0.5) ///
+	mlabsize(vsmall) ///
+	msymbol (oh) ///
+	mcolor(black)
+	
+
+	
+mdsshepard, ///
+    name(shepdists) ///
+    scheme(s1color) ///                                
+    msymbol(oh) ///                                    
+    mcolor(black) ///                                   
+    xaxis (1 2) ///                                     
+    yaxis (1 2) ///                                    
+    ylabel(, axis(1) nogrid) ///                       
+    ylabel(, axis(2) nolabel) ///                       
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                      
+    xtitle("", axis(2)) ///                            
+    ytitle("", axis(2))
+
+	
+	
+	
+
+
+mdsconfig , ///
+    name(fhouse1) ///
+    ynegate ///
+	xnegate ///
+    scheme(s1color) ///
+    msymbol(oh) ///                             
+    mcolor(black)  ///                                 
+    xaxis (1 2) ///                              
+    yaxis (1 2) ///                                 
+    ylabel(, axis(1) nogrid) ///                      
+    ylabel(, axis(2) nolabel) ///                      
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                     
+    xtitle("", axis(2)) ///                             
+    ytitle("", axis(2)) 
+
+   
+   
+mdsmat fhouse, ///
+   method(modern) ///
+   loss(stress) ///
+   shape(full) ///
+   force ///
+   dimensions(2) ///
+   config
+   
+ mdsconfig , ///
+    name(fhouse1) ///
+    ynegate ///
+	xnegate ///
+    scheme(s1color) ///
+    msymbol(oh) ///                             
+    mcolor(black)  ///                                 
+    xaxis (1 2) ///                              
+    yaxis (1 2) ///                                 
+    ylabel(, axis(1) nogrid) ///                      
+    ylabel(, axis(2) nolabel) ///                      
+    xlabel(, axis(2) nolabel) ///                      
+    xsize(4) ///                                     
+    xtitle("", axis(2)) ///                             
+    ytitle("", axis(2)) 
