@@ -1,0 +1,62 @@
+****UN EJEMPLO MEDIANTE EL MÉTODO DE KMEANS Y KMEDIANS ****
+
+/*Para ejemplificar como llevar a cabo un ejercicio de agrupamiento mediante kmeans y kmedians,
+volvermos a hacer uso de la base de datos sobre el Human Development Index empleada en el ejercicio
+número 4. --4_Inequality adjusted hid.dta--*/
+
+
+use "C:\Users\MyDirectory\4_inequality adjusted hid.dta", clear
+
+/*Con fines de contraste vamos a repetir varios de los pasos realizados en el 
+ejercicio4*/
+
+sum hdi chuman_ineq i_le_index i_ed_index i_adinc_index
+
+graph matrix hdi chuman_ineq i_le_index i_ed_index i_adinc_index, half
+
+egen zhdi=std(hdi)
+egen zchuman=std(chuman_ineq)
+egen zle=std(i_le_index)
+egen zed=std(i_ed_index)
+egen zinc=std(i_adinc_index)
+
+sum zhdi zchuman zle zed zinc
+
+graph matrix zhdi zchuman zle zed zinc, half
+
+cluster completelinkage zhdi zchuman zle zed zinc, name(cl)
+cluster gen paisescl2=groups(5), name(cl)
+
+cluster kmeans zhdi zchuman zle zed zinc, k(5) name(g5ps)
+cluster kmeans zhdi zchuman zle zed zinc, k(4) name(g4ps)
+cluster kmeans zhdi zchuman zle zed zinc, k(3) name(g3ps)
+cluster kmeans zhdi zchuman zle zed zinc, k(2) name(g2ps)
+
+cluster stop g5ps
+cluster stop g4ps
+cluster stop g3ps
+cluster stop g2ps
+
+table g3ps paisescl2, col
+table g3ps paisescl2, row
+
+tabstat hdi chuman_ineq i_le_index i_ed_index i_adinc_index, by(g3ps) stat(min mean max)
+
+/*Ahora veamos el método por medoides*/
+
+cluster kmedian zhdi zchuman zle zed zinc, k(5) name(g52ps)
+cluster kmedian zhdi zchuman zle zed zinc, k(4) name(g42ps)
+cluster kmedian zhdi zchuman zle zed zinc, k(3) name(g32ps)
+cluster kmedian zhdi zchuman zle zed zinc, k(2) name(g22ps)
+
+cluster stop g52ps
+cluster stop g42ps
+cluster stop g32ps
+cluster stop g22ps
+
+tabstat hdi chuman_ineq i_le_index i_ed_index i_adinc_index, by(g32ps) stat(median mean)
+
+table g3ps g32ps, col
+
+/*Las diferencias entre el método por centroides o medoides, prácticamente
+no reporta diferencias*/
