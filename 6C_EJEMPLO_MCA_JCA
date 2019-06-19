@@ -1,0 +1,123 @@
+****EJEMPLO 6.6.1. Un ejemplo de MCA y JCA****
+
+/*Para ejemplicar el Multiple Correspondence Analysis y el Joint Correspondence Analysis
+vamos a trabajar con un extracto más de la base de datos sobre percepciones de inseguridad
+en la Delegación Álvaro Obregón. El archivo lo pueden encontrar en este mismo repositorio
+con el nombre 6C_Extracto_DAO.dta*/
+
+use "C:\Users\MyDirectory\6C_Extracto_DAO.dta", clear
+
+
+/*Comencemos etiquetando nuestras variables de interés*/
+lab var evenescu_robo "Robo"
+lab var evenescu_abuso "Detenciones injustificadas"
+lab var evenescu_casa "Allanamiento"
+lab var evenescu_extor "Extorsión"
+lab var evenescu_golpe "Golpes/agresiones"
+lab var evenescu_amen "Amenazas"
+lab var evenescu_homi "Homicidios"
+lab var evenescu_vandal "Vandalismo"
+lab var evenescu_secue "Secuestros"
+
+
+/*A continuación creamos un atajo global*/
+global escu evenescu_robo evenescu_abuso evenescu_casa evenescu_extor evenescu_golpe evenescu_amen evenescu_homi evenescu_vandal evenescu_secue
+
+/*Hacemos un tabulado múltiple*/
+tabm $escu
+
+/*Para tener una indicación más intuitiva de la percepción de ocurrencia de estos
+fenómenos delictivos vamos a crear algunas etiquetas de código*/
+
+lab define menudo 1 "--" 2 "-" 3 "-+" 4 "+" 5 "++"
+lab val $escu menudo
+tabm $escu
+
+/*Ahora solicitemos el MCA con la opción de normalización principal*/
+mca $escu, norm(principal)
+
+/*Ahora creamos un mapa perceptual*/
+
+mcaplot, overlay origin ///
+	mlabsize(small) msize(small) ///
+	aspectratio(0.5) ///
+	legend(pos(6) ring(3) col(3)  size(vsmall))
+
+/*Ahora tratemos de solicituar un JCA. Primero solicitamos la llamada del proceso
+y en segundo lugar, creamos el mapa perceptual por este método*/
+
+mca $escu, meth(joint) norm(principal)
+mcaplot, overlay origin ///
+	mlabsize(small) msize(small) ///
+	aspectratio(0.5) ///
+	legend(pos(6) ring(3) col(3)  size(vsmall))
+	
+	
+/*Ahora tratemos de pasar a otro ejemplo sobre la percepción de seguridad en 
+distintos espacios*/
+
+*Comencemos etiquetando las variables de trabajo
+	
+lab var seguro_casa "Casa"
+lab var seguro_callescol "Calles colonia"
+lab var seguro_escuela "Escuela"
+lab var seguro_negocol "Negocios colonia"
+lab var seguro_negoesc "Negocios escuela"
+lab var seguro_transp "Transporte público"
+lab var seguro_parquecol "Parques colonia"
+lab var seguro_callesc "Calles escuela"
+
+*Creamos un atajo global
+
+global espaseg seguro_casa seguro_callescol seguro_escuela seguro_negocol ///
+	seguro_negoesc seguro_transp seguro_parquecol seguro_callesc
+
+tabm $espaseg
+
+/*Generamos un etiquetado más sencillo*/
+
+lab define seguridad 1 "MI" 2 "IN" 3 "PS" 4 "S" 5 "MS"
+lab val $espaseg seguridad
+tabm $espaseg
+
+/*Para introducir algunas variables capa, vamos a crear una categoría indicativa
+basada en la cuartilización de un índice simple sobre percepción de inseguridad
+en la colonia de residencia y en la escuela*/
+
+xtile micolonia=index_micol, nq(4)	
+xtile miescuela=index_miescu, nq(4)
+
+lab define riesgo 1 "MBajo" 2 "Bajo" 3 "Medio" 4 "Alto"
+lab val micolonia riesgo
+lab val miescuela riesgo 
+
+
+/*Vamos a introducir la variable apilada micolonia*/
+
+mca seguro_casa seguro_callescol seguro_escuela seguro_negocol /// 
+	seguro_negoesc seguro_transp seguro_parquecol seguro_callesc ///
+	(z:micolonia), norm(principal)
+
+mcaplot, overlay origin ///
+	mlabsize(vsmall) msize(small) ///
+	legend(pos(6) ring(3) col(3)  size(vsmall)) ///
+	ylabel(-.5(.5)1.5) xlabel(-1(.5)1)
+
+
+mcaplot, overlay origin ///
+	mlabsize(vsmall) msize(small) ///
+	aspectratio(0.5) ///
+	legend(pos(6) ring(3) col(3)  size(vsmall)) ///
+	ylabel(-.5(.5)1.5) xlabel(-1(.5)1)
+
+/*Ahora vamos a cambiar el método a JCA*/
+
+mca seguro_casa seguro_callescol seguro_escuela seguro_negocol /// 
+	seguro_negoesc seguro_transp seguro_parquecol seguro_callesc ///
+	(z:micolonia), meth(joint) norm(principal)
+
+mcaplot, overlay origin ///
+	mlabsize(vsmall) msize(small) ///
+	aspectratio(0.5) ///
+	legend(pos(6) ring(3) col(3)  size(vsmall)) ///
+	ylabel(-.5(.5)1.5) xlabel(-1(.5)1)
