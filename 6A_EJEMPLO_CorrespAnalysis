@@ -1,0 +1,53 @@
+****6.1. EJEMPLO SOBRE ANÁLISIS DE CORRESPONDENCIAS*/
+
+/*Para este ejemplo vamos a emplear el extracto de la base de datos sobre
+participación juvenil elaborado por Urbina (2014), llamado 1_extracto_pp_urbina.dta*/
+
+
+use "C:\Users\MyDirectory\1_extracto_pp_urbina.dta", clear
+
+
+/*Comenzaremos pidiendo la tabla de contingencia entre la identificación ideológica
+de ego y la disposición a tomar parte en distintos repertorios de participación 
+política. Para valorar la pertinencia del Análisis de Correspondencias podemos
+solicitar la estimación del estadístico ji-cuadrado*/
+
+tab ideolog_p6_6 dispopolq, chi2
+
+/*Solicitemos el análisis de correspondiencia*/
+
+ca ideolog_p6_6 dispopolq
+
+/*Los paneles de salida anteriores vienen explicados con mayor detalles en nuestro
+manual*/
+
+/*En esta línea de comando se incluye una gráfica básica*/
+ca ideolog_p6_6 dispopolq, dim(2) plot
+
+cabiplot, origin
+	
+/*Permite conocer masas de fila y de columna normalizados a 1
+En nuestro manual se muestra la salida para los perfiles de fila*/
+estat profiles
+
+
+/*Permite conocer las distancias entre valores observados y esperados. En
+nuestro manual mostramos la salida para las distancias entre perfiles de fila*/
+estat distances
+
+/*Para la estimación de inercia*/
+estat inertia
+
+/*Si quisiéramos obtener el cabiplot con mayores detalles de graficado*/
+cabiplot, origin subtitle("Ideología y Disposición al involucramiento" "N=963") ///
+	legend(pos(3) ring(3) col(1) lab(1 Ideología) lab(2 Disposición) size(*0.5)) ///
+	rowopts(mlabsize(vsmall) msize(vsmall)) colopts(mlabsize(vsmall) msize(vsmall)) 
+
+/*EJEMPLOS EMPLEADOS EN EL APARTADO 6.4. SOBRE USO DE CABIPLOTS*/
+
+/*Empleando el método de normalización principal*/
+ca ideolog_p6_6 dispopolq, normalize(principal)
+
+cabiplot, origin subtitle("Ideología y Disposición al involucramiento" "N=963") ///
+	legend(pos(3) ring(3) col(1) lab(1 Ideología) lab(2 Disposición) size(*0.5)) ///
+	rowopts(mlabsize(vsmall) msize(vsmall)) colopts(mlabsize(vsmall) msize(vsmall))
