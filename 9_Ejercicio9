@@ -1,0 +1,21 @@
+*****EJERCICIO 9*****
+
+/*Para llevar a cabo el Ejercicio9 vamos a volver a emplear la base de datos
+1_extracto_pp_urbina.dta. En esta ocasión trabajaremos con la probable relación
+de correspondencia entre la autoadscripción ideológica y la identificación parti-
+dista de las y los jóvenes que respondieron a una encuesta*/
+
+	
+use "C:\Users\MyDirectory\1_extracto_pp_urbina.dta", clear
+
+tab ideolog_p6_6 fpartido_p6_1, expected chi2
+
+***Solución al ejercicio9***
+
+ca ideolog_p6_6 fpartido_p6_1, norm(principal)
+cabiplot, origin subtitle("Ideología y partidos" "N=963") ///
+	legend(pos(3) ring(3) col(1) lab(1 Ideología) lab(2 PartPol) size(*0.5)) ///
+	rowopts(mlabsize(vsmall) msize(vsmall)) colopts(mlabsize(vsmall) msize(vsmall)) 
+
+/*Ustedes pueden probar con otros métodos de normalización, considerando las variaciones
+que ello conlleva para la interpretación*/
