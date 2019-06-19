@@ -1,0 +1,33 @@
+*****EJEMPLO 6.5. VARIABLES INTERACTUANTES EN EL CA****
+
+/*A partir de los resultados del ejercicio9 vamos a probar qué sucede cuanto 
+introducimos algunas variables interactuantes en el análisis de correspondencias.
+Evidentemente, volveremos a emplear la base de datos 1_extracto_pp_urbina.dta. En
+primer lugar tratemos de explorar nuestras tablas de contingencia por separado*/
+
+use "C:\Users\MyDirectory\1_extracto_pp_urbina.dta", clear
+
+tab ideolog_p6_6 fpartido_p6_1, chi2
+
+tab spm fpartido_p6_1, chi2
+
+
+/*Ahora intentemos llevar a cabo un análisis mediante el método de normalización
+simétrica*/
+
+ca ideolog_p6_6 (demo: fpartido_p6_1 spm), length(3) norm(symmetric) plot 
+
+
+/*Dado que el gráfico obtenido está demasiado saturado de información, tratemos
+de mejorarlo a partir de las distintas opciones del cabiplot*/
+
+cabiplot, origin subtitle("Ideología y partidos hijos/madre" "N=963") ///  
+	rowopts(mlabsize(vsmall) msize(vsmall)) colopts(mlabsize(vsmall) msize(vsmall))
+	
+	
+/*Ahora intentemos profundizar en la relación entre las categorías de cada variable
+cotejada (filas y columnas) mediante una normalización principal*/
+
+ca ideolog_p6_6 (demo: fpartido_p6_1 spm), norm(principal) plot 
+cabiplot, origin subtitle("Ideología y partidos hijos/madre" "N=963") ///  
+	rowopts(mlabsize(vsmall) msize(vsmall)) colopts(mlabsize(vsmall) msize(vsmall)) 
