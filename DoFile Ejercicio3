@@ -1,0 +1,94 @@
+****EJERCICIO3 CLUSTERS WORLD HAPPINESS REPORT****
+
+/*Para llevar a cabo este ejercicio de muestra sobre clusters y sus 
+distintos métodos vamos a hacer uso del Dataset Happiness, el cual puede
+ser descargado de nuestro repositorio*/
+
+use "C:\Users\MyDirectory\happyness.dta", clear
+
+sum happinessscore economygdppercapita family healthlifeexpectancy freedom generosity trustgovernmentcorruption
+
+
+egen zhappy=std(happinessscore)
+egen zgdp=std(economygdppercapita)
+egen zfam=std(family)
+egen zhealth=std(healthlifeexpectancy)
+egen zlib=std(freedom)
+egen zgeb=std(generosity)
+egen zcon=std(trustgovernmentcorruption)
+*/
+sum zhappy zgdp zfam zhealth zlib zgeb zcon
+
+sort happinessrank
+list country happinessrank
+
+pwcorr zgdp zfam zhealth zlib zgeb zcon, star(0.5)
+
+graph matrix zgdp zfam zhealth zlib zgeb zcon, half
+
+/*Exploración mediante el método single-linkage*/
+
+cluster singlelinkage zgdp zfam zhealth zlib zgeb zcon, name(sl)
+
+cluster dendrogram sl, labels(country) ///
+	xlabel(, angle(90) labsize(*.7)) title(Single-linkage clustering)
+
+cluster dendrogram sl, cutn(20) showcount labels(country) ///
+	xlabel(, angle(90) labsize(*.7)) title(Single-linkage clustering)
+
+cluster tree sl,  cutn(20) showcount horizontal labels(country) ///
+	ylabel(, angle(0) labsize(*.5))
+
+cluster stop sl, rule(duda) groups(1/5)
+cluster stop sl, rule(calinski) groups(2/5)
+
+cluster gen paisessl=groups(4), name(sl)
+
+sort happinessrank
+list country happinessrank paisessl zgdp zfam zhealth zlib zgeb zcon
+list country happinessrank paisessl zgdp zfam zhealth zlib zgeb zcon if paisessl!=3
+
+/*Aproximación mediante el método Complete Linkage*/
+
+cluster completelinkage zgdp zfam zhealth zlib zgeb zcon, name(cla)
+*cluster dendrogram cl, labels(country)
+/*Esta instrucción nuevamente nos manda el error too many leaves*/
+
+/*Esta instrucción nos despliega el dendograma sin etiquetas de nombre*/
+cluster dendrogram cla, cutn(20) showcount xlabel(, angle(90) labsize(*.75))
+
+/*Esta despliega el dendograma con etiquetas por país*/
+cluster dendrogram cla, cutn(20) showcount labels(country) xlabel (, angle(90) labsize(*.75)) 
+
+cluster stop cla, rule(duda) groups(1/10)
+cluster stop cla, rule(calinski) groups(2/10)
+
+cluster gen paisescl4=groups(4), name(cla)
+cluster gen paisescl3=groups(3), name(cla)
+
+table paisescl4, c(mean zgdp mean zfam mean zhealth)
+table paisescl4, c(mean zlib mean zgeb mean zcon)
+
+table paisescl3, c(mean zgdp mean zfam mean zhealth)
+table paisescl3, c(mean zlib mean zgeb mean zcon)
+
+sort paisescl4
+list country happinessrank paisescl4 paisescl3 zgdp zfam zhealth zlib zgeb zcon
+
+
+/*Exploración mediante el método Average Linkage*/
+cluster averagelinkage zgdp zfam zhealth zlib zgeb zcon, name(avgl)
+
+*cluster dendrogram avgl, labels(country) xlabel(, angle(90) labsize(*.75))
+cluster dendrogram avgl, cutn(20) showcount labels(country) xlabel(, angle(90) labsize(*.75))
+
+cluster stop avgl, rule(duda) groups(1/5)
+cluster stop avgl, rule(calinski) groups(2/5)
+
+cluster gen paisesavg=groups(5), name(avgl)
+
+sort paisesavg
+list country happinessrank paisesavg paisescl4 paisescl3 zgdp zfam zhealth zlib zgeb zcon
+
+table paisesavg, c(mean zgdp mean zfam mean zhealth)
+table paisesavg, c(mean zlib mean zgeb mean zcon)
